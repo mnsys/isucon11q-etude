@@ -26,9 +26,18 @@ deploy:
 	ssh $(REMOTEHOST1) sudo systemctl daemon-reload
 	ssh $(REMOTEHOST1) sudo systemctl start isucondition.go
 
+web0:
+	ssh $(REMOTEHOST0)
+
 web1:
 	ssh -L 13306:127.0.0.1:3306 $(REMOTEHOST1)
 	# mysql -h 127.0.0.1 -P 13306 -uisucon -pisucon isucondition
+
+web2:
+	ssh $(REMOTEHOST2)
+
+web3:
+	ssh $(REMOTEHOST3)
 
 fetch-prog:
 	scp $(REMOTEHOST1):webapp/go/*.go .
