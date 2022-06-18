@@ -1,7 +1,7 @@
 REMOTEHOST0=isucon@54.178.196.217
 REMOTEHOST1=isucon@3.112.34.175
 REMOTEHOST2=isucon@13.113.90.76
-REMOTEHOST3=isucon@54.178.196.217
+REMOTEHOST3=isucon@54.95.250.134
 
 TIMEID := $(shell date +%Y%m%d-%H%M%S)
 
@@ -55,6 +55,9 @@ fetch-conf: # plan-B fetch
 
 pprof:
 	go tool pprof -http="127.0.0.1:8081" logs/latest/cpu-web1.pprof 
+
+bench:
+	ssh $(REMOTEHOST0) "/home/isucon/bench.sh"
 
 .PHONY: schemaspy
 schemaspy:
