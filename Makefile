@@ -25,6 +25,9 @@ deploy:
 	cat isucondition.go.service | ssh $(REMOTEHOST1) sudo tee /etc/systemd/system/isucondition.go.service >/dev/null
 	ssh $(REMOTEHOST1) sudo systemctl daemon-reload
 	ssh $(REMOTEHOST1) sudo systemctl start isucondition.go
+	cat host1-nginx.conf | ssh $(REMOTEHOST1) sudo tee /etc/nginx/nginx.conf >/dev/null
+	ssh $(REMOTEHOST1) sudo nginx -t
+	ssh $(REMOTEHOST1) sudo systemctl restart nginx
 
 web0:
 	ssh $(REMOTEHOST0)
@@ -59,22 +62,6 @@ schemaspy:
 	docker run --network host -v "${PWD}/schemaspy:/output" schemaspy/schemaspy:latest -t mysql -db isucondition -host 127.0.0.1 -port 13306 -s isucondition -u isucon -p isucon 
 	python3 -m http.server -d schemaspy
 
-########################################
-
-# sudo apt etckeeper
-# echo "* * * * * root sudo etckeeper commit autu-commit" | sudo tee /etc/cron.d/etckeeper
-
-########################################
-
-deploy-conf: #plan-A
-	ssh $(REMOTEHOST1) sudo systemctl stop nginx
-	scp web-1.nginx.conf $(REMOTEHOST1):/etc/nginx/nginx.conf
-	ssh $(REMOTEHOST1) sudo systemctl start nginx
-	ssh $(REMOTEHOST2) sudo systemctl stop nginx
-	scp web-2.nginx.conf $(REMOTEHOST2):/etc/nginx/nginx.conf
-	ssh $(REMOTEHOST2) sudo systemctl start nginx
-
-
 collect-logs:
 	mkdir -p logs/${TIMEID}
 	rm -f logs/latest
@@ -89,3 +76,17 @@ collect-logs:
 truncate-logs:
 	ssh ${REMOTEHOST1} sudo truncate -c -s 0 /var/log/nginx/access.log
 	ssh ${REMOTEHOST1} sudo truncate -c -s 0 /tmp/sql.log
+
+########################################
+
+# $ sudo apt etckeeper && echo "* * * * * root sudo etckeeper commit autu-commit" | sudo tee /etc/cron.d/etckeeper
+
+########################################
+
+deploy-conf: #plan-A
+	ssh $(REMOTEHOST1) sudo systemctl stop nginx
+	scp web-1.nginx.conf $(REMOTEHOST1):/etc/nginx/nginx.conf
+	ssh $(REMOTEHOST1) sudo systemctl start nginx
+	ssh $(REMOTEHOST2) sudo systemctl stop nginx
+	scp web-2.nginx.conf $(REMOTEHOST2):/etc/nginx/nginx.conf
+	ssh $(REMOTEHOST2) sudo systemctl start nginx

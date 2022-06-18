@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime/pprof"
 	"sort"
 	"strconv"
 	"strings"
@@ -20,6 +21,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
+	_ "github.com/hirosuzuki/go-sql-logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -190,7 +192,7 @@ func NewMySQLConnectionEnv() *MySQLConnectionEnv {
 
 func (mc *MySQLConnectionEnv) ConnectDB() (*sqlx.DB, error) {
 	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&loc=Asia%%2FTokyo", mc.User, mc.Password, mc.Host, mc.Port, mc.DBName)
-	return sqlx.Open("mysql", dsn)
+	return sqlx.Open("mysql"+os.Getenv("MYSQL_DRIVER_POSTFIX"), dsn)
 }
 
 func init() {
@@ -306,6 +308,17 @@ func getJIAServiceURL(tx *sqlx.Tx) string {
 // POST /initialize
 // サービスを初期化
 func postInitialize(c echo.Context) error {
+	go func() {
+		logfilename := os.Getenv("CPU_PROFILE_FILE")
+		if logfilename != "" {
+			logfile, _ := os.Create(logfilename)
+			defer logfile.Close()
+			pprof.StartCPUProfile(logfile)
+			defer pprof.StopCPUProfile()
+			time.Sleep(70 * time.Second)
+		}
+	}()
+
 	var request InitializeRequest
 	err := c.Bind(&request)
 	if err != nil {
