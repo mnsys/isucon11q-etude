@@ -22,6 +22,7 @@ deploy:
 	ssh $(REMOTEHOST1) sudo systemctl stop isucondition.go
 	scp isucondition $(REMOTEHOST1):~/webapp/go/isucondition
 	scp env.sh $(REMOTEHOST1):~/env.sh
+	scp 0_Schema.sql $(REMOTEHOST1):~/webapp/sql/0_Schema.sql
 	cat isucondition.go.service | ssh $(REMOTEHOST1) sudo tee /etc/systemd/system/isucondition.go.service >/dev/null
 	ssh $(REMOTEHOST1) sudo systemctl daemon-reload
 	ssh $(REMOTEHOST1) sudo systemctl start isucondition.go
@@ -43,9 +44,10 @@ web3:
 	ssh $(REMOTEHOST3)
 
 fetch-prog:
-	scp $(REMOTEHOST1):webapp/go/*.go .
-	scp $(REMOTEHOST1):webapp/go/go.* .
-	scp $(REMOTEHOST1):env.sh .
+	# scp $(REMOTEHOST1):webapp/go/*.go .
+	# scp $(REMOTEHOST1):webapp/go/go.* .
+	# scp $(REMOTEHOST1):env.sh .
+	# scp $(REMOTEHOST1):webapp/sql/0_Schema.sql .
 
 fetch-conf: # plan-B fetch
 	mkdir -p files
