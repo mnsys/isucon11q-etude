@@ -9,7 +9,7 @@ EnvironmentFile=/home/isucon/env.sh
 User=isucon
 Group=isucon
 ExecStart=/home/isucon/webapp/go/isucondition
-
+StandardError=file:/tmp/isucon.go.err
 Restart   = always
 Type      = simple
 
